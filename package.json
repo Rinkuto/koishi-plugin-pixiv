@@ -1,0 +1,31 @@
+{
+  "name": "@rinkuto/koishi-plugin-pixiv",
+  "description": "从pixiv镜像站中获取图片",
+  "version": "0.0.1",
+  "main": "lib/index.js",
+  "typings": "lib/index.d.ts",
+  "files": [
+    "lib",
+    "dist"
+  ],
+  "license": "MIT",
+  "scripts": {
+    "build": "tsc -b && koishi-console build"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/rinkuto/koishi-plugin-pixiv.git"
+  },
+  "keywords": [
+    "koishi",
+    "plugin",
+    "pixiv",
+    "image"
+  ],
+  "peerDependencies": {
+    "koishi": "^4.11.7"
+  },
+  "dependencies": {
+    "node-schedule": "^2.1.1"
+  }
+}

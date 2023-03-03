@@ -23,3 +23,19 @@ export interface Vilipix {
   tags: string,
   picture_id: string,
 }
+
+export interface Lolicon {
+  pid: number,
+  p: number,
+  uid: number,
+  title: string,
+  author: string,
+  "r18": false,
+  tags: string[],
+  ext: number,
+  aiType: number,
+  uploadDate: number,
+  urls: {
+    original: string
+  }
+}

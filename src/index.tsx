@@ -11,8 +11,7 @@ let date = new Date(new Date().getTime() - 24 * 60 * 60 * 1000).toISOString().sp
 
 import Config from "./config";
 
-export * from './Config'
-
+export * from './config'
 
 // r18	int	0	        0为非 R18，1为 R18，2为混合（在库中的分类，不等同于作品本身的 R18 标识）
 // num	int	1         一次返回的结果数量，范围为1到20；在指定关键字或标签的情况下，结果数量可能会不足指定的数量
@@ -33,54 +32,55 @@ let _config: Config;
 
 export function apply(ctx: Context, config: Config) {
   const logger = ctx.logger('pixiv');
-  _config = config
+  _config = config;
   ctx.command('来张色图 [tag:text]', '随机一张色图')
+    .option('n', '-n <value:number>', {
+      fallback: 1,
+    })
     .alias('色图')
-    .action(async ({session}, tag) => {
+    .action(async ({session, options}, tag) => {
       let image: Lolicon;
       await session.send('不可以涩涩哦~');
-      try {
-        image = await getPixivImage(ctx, tag);
-        if (image.urls === undefined) {
-          await session.send(
-            <>
-              <at id={session.userId}></at>
+      const messages = [];
+      for (let i = 0; i < Math.min(10, options.n); i++) {
+        try {
+          image = await getPixivImage(ctx, tag);
+          if (image.urls === undefined) {
+            messages.push(<message>
               <text content={'没有获取到喵\n'}></text>
-            </>
-          );
-        } else {
-          session.send(
-            <>
-              <at id={session.userId}/>
+            </message>)
+          } else {
+            messages.push(<message>
               <image url={image.urls.original}></image>
-              <text content={`title：${image.title}\n`}></text>
+              <text content={`\ntitle：${image.title}\n`}></text>
               <text content={`id：${image.pid}\n`}></text>
               <text content={`tags：${image.tags.map((item) => {
                 return '#' + item
               }).join(' ')}\n`}></text>
-            </>
-          ).then(res => {
-            if (res.length === 0) {
-              logger.error(`消息发送失败，账号可能被风控，失败图片url：${image.urls.original}`);
-              session.send(
-                <>
-                  <at id={session.userId}></at>
-                  <text content={'图片发送失败了喵\n'}></text>
-                  <text content={image.urls.original}></text>
-                </>
-              );
-            }
-          })
+            </message>)
+          }
+        } catch (e) {
+          messages.push(<message>
+            <text content={`图片获取失败了喵~，code:${e.code}`}></text>
+          </message>)
         }
-      } catch (e) {
-        logger.error(e);
-        await session.send(
-          <>
-            <at id={session.userId}></at>
-            <text content={'图片发送失败了喵\n'}></text>
-          </>
-        );
       }
+      session.send(
+        <>
+          <message forward={true}>
+            {messages}
+          </message>
+        </>).then(res => {
+        if (res.length === 0) {
+          logger.error(`消息发送失败，账号可能被风控`);
+          session.send(
+            <>
+              <at id={session.userId}></at>
+              <text content={'消息发送失败了喵，账号可能被风控\n'}></text>
+            </>
+          );
+        }
+      })
     })
 }
 
